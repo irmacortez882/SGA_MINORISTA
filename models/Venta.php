@@ -30,8 +30,12 @@ class Venta {
             $idVentaGenerado = $db->lastInsertId();
 
             // 2. Decodificar JSON del carrito proveniente de JS
-            $productos = is_array($datos['productos']) ? $datos['productos'] : json_decode($datos['productos'], true);
+            $productos = is_array($datos['productos']) ? $datos['productos']
+             : json_decode($datos['productos'], true);
 
+            // 🔍 AGREGAR ESTO PARA DEPURAR EN EL LOG DE XAMPP:
+             error_log("CONTENIDO RECIBIDO EN PRODUCTOS: " . print_r($productos, true));     
+            
             if (is_array($productos)) {
                 $sqlDetalle = "INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario) 
                                VALUES (:id_venta, :id_producto, :cantidad, :precio)";
@@ -46,9 +50,9 @@ class Venta {
 
                 foreach ($productos as $prod) {
                     // Mapeo exacto del JSON que manda crear-venta.php: {id, descripcion, precio, cantidad, total}
-                    $idProducto = $prod['id']       ?? $prod['id_producto'] ?? null;
-                    $cantidad   = $prod['cantidad'] ?? $prod['cant']        ?? 1;
-                    $precio     = $prod['precio']   ?? $prod['precio_venta']?? 0;
+                    $idProducto = $prod['id_producto'] ?? $prod['id'] ?? null;
+                    $cantidad   = $prod['cantidad'] ?? $prod['cant'] ?? 1;
+                    $precio     = $prod['precio'] ?? $prod['precio_venta'] ?? 0;
 
                     if (!$idProducto) continue;
 

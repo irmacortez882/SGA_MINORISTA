@@ -1,4 +1,7 @@
 <?php
+// Definir la URL absoluta del proyecto para evitar errores 404 en assets y redirecciones
+define("URL", "http://localhost/SGA_MINORISTA/");
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);

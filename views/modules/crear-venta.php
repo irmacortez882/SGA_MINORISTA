@@ -18,13 +18,7 @@ require_once "models/Venta.php";
     </section>
 
     <section class="content">
-        <!-- PROCESAR VENTA AL ENVIAR EL FORMULARIO POR POST DIRECTO -->
-        <?php
-            $crearVenta = new VentaController();
-            $crearVenta->ctrCrearVenta();
-        ?>
-
-        <form id="formFactura" method="post" class="row">
+        <form id="formFactura" class="row">
             
             <!-- COLUMNA IZQUIERDA: SELECCIÓN DE PRODUCTOS -->
             <div class="col-md-5 col-xs-12">
@@ -48,8 +42,6 @@ require_once "models/Venta.php";
                                             $idProd = $value["id_producto"] ?? $value["id"] ?? 0;
                                             $desc   = htmlspecialchars($value["nombre_producto"] ?? $value["nombre"] ?? $value["descripcion"] ?? "Producto");
                                             $precio = $value["precio_venta"] ?? $value["precio_unitario"] ?? $value["precio"] ?? 0;
-                                            
-                                            // Compatibilidad amplia para recuperar stock_actual fresco desde la BD
                                             $stock  = $value["stock_actual"] ?? $value["stock"] ?? $value["cant_stock"] ?? 0;
 
                                             echo '<option value="'.$idProd.'" data-precio="'.$precio.'" data-stock="'.$stock.'" data-descripcion="'.$desc.'">'.$desc.' (Stock: '.$stock.') - $'.number_format($precio, 2, ',', '.').'</option>';
@@ -141,35 +133,36 @@ require_once "models/Venta.php";
     </section>
 </div>
 
-<!-- JAVASCRIPT NATIVO -->
+<!-- JAVASCRIPT CON AJAX PARA PROCESAR TRANSACCIÓN Y TICKET -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-window.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
 
     var carrito = [];
 
-    var btnAgregar  = document.getElementById("btnAgregarCarrito");
-    var selectProd  = document.getElementById("selectProducto");
-    var inputCant   = document.getElementById("cantProducto");
-    var btnVaciar   = document.getElementById("btnVaciarCarrito");
-    var btnBorrador = document.getElementById("btnImprimirBorrador");
-    var form        = document.getElementById("formFactura");
+    var btnAgregar  = $("#btnAgregarCarrito");
+    var selectProd  = $("#selectProducto");
+    var inputCant   = $("#cantProducto");
+    var btnVaciar   = $("#btnVaciarCarrito");
+    var btnBorrador = $("#btnImprimirBorrador");
+    var form        = $("#formFactura");
 
     // 1. Agregar Producto
-    btnAgregar.addEventListener("click", function(e) {
+    btnAgregar.on("click", function(e) {
         e.preventDefault();
 
-        var selectedOption = selectProd.options[selectProd.selectedIndex];
-        var id = selectProd.value;
+        var selectedOption = selectProd.find('option:selected');
+        var id = selectProd.val();
 
         if (!id || id === "") {
             alert("Por favor, selecciona un producto.");
             return;
         }
 
-        var descripcion = selectedOption.getAttribute("data-descripcion") || selectedOption.text;
-        var precio      = parseFloat(selectedOption.getAttribute("data-precio") || 0);
-        var stock       = parseInt(selectedOption.getAttribute("data-stock") || 0);
-        var cantidad    = parseInt(inputCant.value || 1);
+        var descripcion = selectedOption.attr("data-descripcion") || selectedOption.text();
+        var precio      = parseFloat(selectedOption.attr("data-precio") || 0);
+        var stock       = parseInt(selectedOption.attr("data-stock") || 0);
+        var cantidad    = parseInt(inputCant.val() || 1);
 
         if (isNaN(cantidad) || cantidad <= 0) {
             alert("Ingresa una cantidad válida.");
@@ -206,17 +199,17 @@ window.addEventListener('DOMContentLoaded', function() {
         }
 
         renderizarTabla();
-        inputCant.value = 1;
+        inputCant.val(1);
     });
 
     // 2. Vaciar Carrito
-    btnVaciar.addEventListener("click", function() {
+    btnVaciar.on("click", function() {
         carrito = [];
         renderizarTabla();
     });
 
     // 3. Imprimir Presupuesto/Borrador
-    btnBorrador.addEventListener("click", function() {
+    btnBorrador.on("click", function() {
         if (carrito.length === 0) {
             alert("Agrega al menos un producto para previsualizar.");
             return;
@@ -226,23 +219,23 @@ window.addEventListener('DOMContentLoaded', function() {
 
     // 4. Renderizar Tabla en HTML
     function renderizarTabla() {
-        var tbody      = document.querySelector("#tablaCarrito tbody");
-        var lblTotal   = document.getElementById("lblTotal");
-        var inputTotal = document.getElementById("totalVenta");
-        var inputLista = document.getElementById("listaProductos");
+        var tbody      = $("#tablaCarrito tbody");
+        var lblTotal   = $("#lblTotal");
+        var inputTotal = $("#totalVenta");
+        var inputLista = $("#listaProductos");
 
-        tbody.innerHTML = "";
+        tbody.empty();
         var totalGeneral = 0;
 
         if (carrito.length === 0) {
-            tbody.innerHTML = '<tr id="filaVacia"><td colspan="5" class="text-center">No hay productos en la cesta</td></tr>';
+            tbody.html('<tr id="filaVacia"><td colspan="5" class="text-center">No hay productos en la cesta</td></tr>');
         } else {
             for (var i = 0; i < carrito.length; i++) {
                 var item = carrito[i];
                 totalGeneral += item.total;
 
-                var tr = document.createElement("tr");
-                tr.innerHTML = '<td>' + item.cantidad + '</td>' +
+                var tr = $("<tr>");
+                tr.html('<td>' + item.cantidad + '</td>' +
                     '<td>' + item.descripcion + '</td>' +
                     '<td>$' + item.precio.toFixed(2) + '</td>' +
                     '<td>$' + item.total.toFixed(2) + '</td>' +
@@ -250,32 +243,64 @@ window.addEventListener('DOMContentLoaded', function() {
                         '<button type="button" class="btn btn-danger btn-xs btnEliminar" data-id="' + item.id + '">' +
                             '<i class="fa fa-times"></i>' +
                         '</button>' +
-                    '</td>';
-                tbody.appendChild(tr);
+                    '</td>');
+                tbody.append(tr);
             }
         }
 
-        lblTotal.innerText = totalGeneral.toFixed(2);
-        inputTotal.value = totalGeneral;
-        inputLista.value = JSON.stringify(carrito);
+        lblTotal.text(totalGeneral.toFixed(2));
+        inputTotal.val(totalGeneral);
+        inputLista.val(JSON.stringify(carrito));
 
-        var btnsEliminar = document.querySelectorAll(".btnEliminar");
-        btnsEliminar.forEach(function(btn) {
-            btn.addEventListener("click", function() {
-                var idEliminar = this.getAttribute("data-id");
-                carrito = carrito.filter(function(p) { return p.id != idEliminar; });
-                renderizarTabla();
-            });
+        $(".btnEliminar").on("click", function() {
+            var idEliminar = $(this).attr("data-id");
+            carrito = carrito.filter(function(p) { return p.id != idEliminar; });
+            renderizarTabla();
         });
     }
 
-    // 5. Validar Submit
-    form.addEventListener("submit", function(e) {
+    // 5. Enviar por AJAX al controlador para descontar stock, guardar y abrir el ticket
+    form.on("submit", function(e) {
+        e.preventDefault();
+
         if (carrito.length === 0) {
-            e.preventDefault();
             alert("Debes agregar al menos un producto para facturar.");
-            return false;
+            return;
         }
+
+        var totalVenta = $("#totalVenta").val();
+        var listaProductos = $("#listaProductos").val();
+
+        var datos = new FormData();
+        datos.append("totalVenta", totalVenta);
+        datos.append("listaProductos", listaProductos);
+
+        $.ajax({
+            url: "ajax/ventas.ajax.php", // Archivo que procesa la respuesta JSON del controlador
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function(respuesta) {
+                if (respuesta && respuesta.status === "ok") {
+                    alert("¡Venta registrada con éxito y stock actualizado! Factura N°: " + respuesta.codigo_factura);
+                    
+                    // Abre el ticket generado en nueva pestaña
+                    window.open("index.php?action=ver-ventas&id=" + respuesta.id_venta, "_blank");
+                    
+                    // Limpia la pantalla recargando
+                    window.location = "index.php?action=crear-venta";
+                } else {
+                    alert("Error: " + (respuesta.mensaje || "No se pudo completar la venta."));
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error en la solicitud AJAX:", textStatus, errorThrown);
+                alert("Ocurrió un error al procesar la transacción en la base de datos.");
+            }
+        });
     });
 
 });

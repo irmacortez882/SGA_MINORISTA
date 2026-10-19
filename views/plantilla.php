@@ -15,8 +15,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Iconos Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
-    <!-- Estilos personalizados -->
-    <link rel="stylesheet" href="views/assets/css/estilos.css">
+    <!-- Estilos personalizados usando URL absoluta -->
+    <link rel="stylesheet" href="<?php echo URL; ?>views/assets/css/estilos.css">
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
@@ -32,14 +32,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <!-- PIE DE PÁGINA -->
         <?php include "views/includes/footer.php"; ?>
-         </div> <!-- Cierre de .wrapper -->
 
-         <!-- 1. jQuery PRIMERO -->
-             <script src="views/assets/js/jquery.min.js"></script>
-             <!-- 2. Bootstrap JS SEGUNDO -->
-             <script src="views/assets/js/bootstrap.min.js"></script>
-             <!-- 3. AdminLTE JS TERCERO -->
-             <script src="views/assets/js/adminlte.min.js"></script>
+        <!-- SCRIPTS JS (Usando CDN para jQuery por seguridad y constante URL para locales) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?php echo URL; ?>views/assets/js/main.js"></script>
 
     <?php else: ?>
 
@@ -48,11 +45,10 @@ if (session_status() === PHP_SESSION_NONE) {
             <?php include "views/modules/login.php"; ?>
         </main>
 
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <?php endif; ?>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Scripts JS personalizados -->
-    <script src="views/assets/js/main.js"></script>
 </body>
 </html>

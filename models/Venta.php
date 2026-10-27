@@ -15,30 +15,31 @@ class Venta {
             $db = Conexion::conectar();
             $db->beginTransaction();
 
-            $idUsuario = $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? 1;
-
             // 1. Obtener el último código de factura / número correlativo
-            $sqlUltimo = "SELECT numero_comprobante FROM ventas ORDER BY id_venta DESC LIMIT 1";
+            $sqlUltimo = "SELECT codigo_factura FROM ventas ORDER BY id_venta DESC LIMIT 1";
             $stmtUltimo = $db->prepare($sqlUltimo);
             $stmtUltimo->execute();
             $ultimaVenta = $stmtUltimo->fetch(PDO::FETCH_ASSOC);
 
-            if (!$ultimaVenta || empty($ultimaVenta['numero_comprobante'])) {
+            if (!$ultimaVenta || empty($ultimaVenta['codigo_factura'])) {
                 $codigoFactura = "0001-00000001";
             } else {
-                $partes = explode("-", $ultimaVenta['numero_comprobante']);
-                $siguienteNumero = intval($partes[1]) + 1;
-                $codigoFactura = $partes[0] . "-" . str_pad($siguienteNumero, 8, "0", STR_PAD_LEFT);
+                $partes = explode("-", $ultimaVenta['codigo_factura']);
+                if (isset($partes[1])) {
+                    $siguienteNumero = intval($partes[1]) + 1;
+                    $codigoFactura = $partes[0] . "-" . str_pad($siguienteNumero, 8, "0", STR_PAD_LEFT);
+                } else {
+                    $codigoFactura = "0001-" . str_pad(intval($ultimaVenta['codigo_factura']) + 1, 8, "0", STR_PAD_LEFT);
+                }
             }
 
-            // 2. Insertar el encabezado de la venta usando el correlativo generado
-            $sqlVenta = "INSERT INTO ventas (numero_comprobante, tipo_comprobante, fecha_venta, total, id_usuario, estado) 
-                         VALUES (:num, 'FAC', NOW(), :total, :id_usuario, '1')";
+            // 2. Insertar el encabezado de la venta
+            $sqlVenta = "INSERT INTO ventas (codigo_factura, fecha_hora, total) 
+                         VALUES (:num, NOW(), :total)";
             $stmtVenta = $db->prepare($sqlVenta);
             $stmtVenta->execute([
-                ':num'        => $codigoFactura,
-                ':total'      => $datos['total'],
-                ':id_usuario' => $idUsuario
+                ':num'   => $codigoFactura,
+                ':total' => $datos['total']
             ]);
 
             $idVentaGenerado = $db->lastInsertId();
@@ -47,21 +48,18 @@ class Venta {
             $productos = is_array($datos['productos']) ? $datos['productos']
              : json_decode($datos['productos'], true);
 
-            // Depuración en el log de XAMPP
-            error_log("CONTENIDO RECIBIDO EN PRODUCTOS: " . print_r($productos, true));    
-            
             if (is_array($productos)) {
-                $sqlDetalle = "INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario) 
+                // Actualizado a 'preciounitario' sin guion bajo
+                $sqlDetalle = "INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, preciounitario) 
                                VALUES (:id_venta, :id_producto, :cantidad, :precio)";
                 
-                // Descuento y validación de stock en tabla productos
                 $sqlStockCheck = "SELECT stock_actual FROM productos WHERE id_producto = :id_producto FOR UPDATE";
                 $sqlStockUpdate = "UPDATE productos 
                                    SET stock_actual = stock_actual - :cantidad 
                                    WHERE id_producto = :id_producto";
 
-                $stmtDetalle    = $db->prepare($sqlDetalle);
-                $stmtStockCheck = $db->prepare($sqlStockCheck);
+                $stmtDetalle     = $db->prepare($sqlDetalle);
+                $stmtStockCheck  = $db->prepare($sqlStockCheck);
                 $stmtStockUpdate = $db->prepare($sqlStockUpdate);
 
                 foreach ($productos as $prod) {
@@ -71,12 +69,10 @@ class Venta {
 
                     if (!$idProducto) continue;
 
-                    // Verificar stock actual antes de descontar para asegurar consistencia
                     $stmtStockCheck->execute([':id_producto' => $idProducto]);
                     $prodActual = $stmtStockCheck->fetch(PDO::FETCH_ASSOC);
 
                     if ($prodActual && $prodActual['stock_actual'] >= $cantidad) {
-                        // Insertar detalle
                         $stmtDetalle->execute([
                             ':id_venta'    => $idVentaGenerado,
                             ':id_producto' => $idProducto,
@@ -84,7 +80,6 @@ class Venta {
                             ':precio'      => $precio
                         ]);
 
-                        // Descontar Stock
                         $stmtStockUpdate->execute([
                             ':cantidad'    => $cantidad,
                             ':id_producto' => $idProducto
@@ -97,8 +92,8 @@ class Venta {
 
             $db->commit();
             return [
-                "status" => true,
-                "id_venta" => $idVentaGenerado,
+                "status"         => true,
+                "id_venta"       => $idVentaGenerado,
                 "codigo_factura" => $codigoFactura
             ];
 
@@ -107,17 +102,17 @@ class Venta {
                 $db->rollBack();
             }
             error_log("Error en Venta::guardarVentaModel -> " . $e->getMessage());
-            return false;
+            return [
+                "status"  => false,
+                "mensaje" => "Error técnico: " . $e->getMessage()
+            ];
         }
     }
 
     public static function listarVentasModel() {
         try {
             $db = Conexion::conectar();
-            $sql = "SELECT v.*, u.nombre AS nombre_usuario 
-                    FROM ventas v
-                    LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
-                    ORDER BY v.id_venta DESC";
+            $sql = "SELECT * FROM ventas ORDER BY id_venta DESC";
             $stmt = $db->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -138,10 +133,7 @@ class Venta {
     public static function obtenerVentaPorId($idVenta) {
         try {
             $db = Conexion::conectar();
-            $sql = "SELECT v.*, u.nombre AS nombre_usuario 
-                    FROM ventas v
-                    LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
-                    WHERE v.id_venta = :id";
+            $sql = "SELECT * FROM ventas WHERE id_venta = :id";
             $stmt = $db->prepare($sql);
             $stmt->execute([':id' => $idVenta]);
             return $stmt->fetch(PDO::FETCH_ASSOC);

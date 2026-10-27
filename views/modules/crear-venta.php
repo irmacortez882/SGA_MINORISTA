@@ -276,7 +276,7 @@ $(document).ready(function() {
         datos.append("listaProductos", listaProductos);
 
         $.ajax({
-            url: "ajax/ventas.ajax.php", // Archivo que procesa la respuesta JSON del controlador
+            url: "ajax/ventas.ajax.php",
             method: "POST",
             data: datos,
             cache: false,
@@ -285,20 +285,18 @@ $(document).ready(function() {
             dataType: "json",
             success: function(respuesta) {
                 if (respuesta && respuesta.status === "ok") {
-                    alert("¡Venta registrada con éxito y stock actualizado! Factura N°: " + respuesta.codigo_factura);
-                    
-                    // Abre el ticket generado en nueva pestaña
+                    alert("¡Venta registrada con éxito! Factura N°: " + respuesta.codigo_factura);
                     window.open("index.php?action=ver-ventas&id=" + respuesta.id_venta, "_blank");
-                    
-                    // Limpia la pantalla recargando
                     window.location = "index.php?action=crear-venta";
                 } else {
-                    alert("Error: " + (respuesta.mensaje || "No se pudo completar la venta."));
+                    // Muestra el mensaje exacto que viene del servidor
+                    alert("Error devuelto por el servidor: " + (respuesta.mensaje || JSON.stringify(respuesta)));
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.error("Error en la solicitud AJAX:", textStatus, errorThrown);
-                alert("Ocurrió un error al procesar la transacción en la base de datos.");
+                // Muestra el texto bruto de la respuesta PHP si no es un JSON válido
+                console.error("Respuesta raw del servidor:", jqXHR.responseText);
+                alert("Error de sintaxis o excepción PHP. Revisá la consola (F12) en la pestaña Console/Network.");
             }
         });
     });

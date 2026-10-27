@@ -1,7 +1,7 @@
 <header class="main-header">
 
   <!-- Logo del Sistema -->
-  <a href="index.php?action=inicio" class="logo">
+  <a href="<?php echo URL; ?>index.php?action=inicio" class="logo">
     <span class="logo-mini"><b>SGA</b></span>
     <span class="logo-lg"><b>SGA</b> Minorista</span>
   </a>
@@ -20,28 +20,28 @@
 
         <!-- 1. Botón Directo: Nueva Venta -->
         <li>
-          <a href="index.php?action=crear-venta">
+          <a href="<?php echo URL; ?>index.php?action=crear-venta">
             <i class="fa fa-shopping-cart"></i> <span>Nueva Venta</span>
           </a>
         </li>
 
         <!-- 2. Botón Directo: Listado de Notas de Crédito -->
         <li>
-          <a href="index.php?action=notas-credito">
+          <a href="<?php echo URL; ?>index.php?action=notas-credito">
             <i class="fa fa-list"></i> <span>Ver NC</span>
           </a>
         </li>
 
         <!-- 3. Botón Directo: Crear Nota de Crédito -->
         <li>
-          <a href="index.php?action=crear-nota-credito">
+          <a href="<?php echo URL; ?>index.php?action=crear-nota-credito">
             <i class="fa fa-plus-circle"></i> <span>Nueva NC</span>
           </a>
         </li>
 
         <!-- 4. Menú Usuario / Salir -->
         <li>
-          <a href="index.php?action=salir">
+          <a href="<?php echo URL; ?>index.php?action=salir">
             <i class="fa fa-power-off text-red"></i> <span>Salir</span>
           </a>
         </li>

@@ -16,7 +16,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Estilos personalizados usando URL absoluta -->
-    <link rel="stylesheet" href="<?php echo URL; ?>views/assets/css/estilos.css">
+    <link rel="stylesheet" href="<?php echo URL; ?>views/assets/css/style.css">
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
@@ -36,7 +36,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <!-- SCRIPTS JS (Usando CDN para jQuery por seguridad y constante URL para locales) -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="<?php echo URL; ?>views/assets/js/main.js"></script>
+        <script src="<?php echo URL; ?>views/assets/main.js"></script>
 
     <?php else: ?>
 

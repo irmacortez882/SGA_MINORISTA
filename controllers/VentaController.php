@@ -14,7 +14,7 @@ foreach ($modelsPath as $file) {
 
 class VentaController {
 
-    public static function listarVentasController() {
+    public static function ctrListarVentas() {
         return Venta::listarVentasModel();
     }
 

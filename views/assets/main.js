@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Ejemplo genérico para capturar formularios de envío por AJAX (como crear venta)
     const formVenta = document.querySelector("#formCrearVenta");
 
     if (formVenta) {
@@ -16,6 +15,14 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 if (data.status === "success" || data.success) {
                     alert(data.mensaje || "Operación realizada con éxito");
+
+                    // Abre automáticamente el ticket en una pestaña nueva
+                    if (data.url_ticket || data.ticket_url) {
+                        window.open(data.url_ticket || data.ticket_url, '_blank');
+                    } else if (data.id_venta) {
+                        window.open('ver_ticket.php?id=' + data.id_venta, '_blank');
+                    }
+
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     }

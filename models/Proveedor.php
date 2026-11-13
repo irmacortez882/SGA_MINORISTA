@@ -10,19 +10,17 @@ class Proveedor {
     }
 
     public static function guardarProveedorModel($datos) {
-        $stmt = Conexion::conectar()->prepare("INSERT INTO proveedores (nombre_proveedor, telefono, email) VALUES (:nombre_proveedor, :telefono, :email)");
+        $stmt = Conexion::conectar()->prepare("INSERT INTO proveedores (nombre_proveedor, telefono) VALUES (:nombre_proveedor, :telefono)");
         $stmt->bindParam(":nombre_proveedor", $datos["nombre_proveedor"], PDO::PARAM_STR);
         $stmt->bindParam(":telefono", $datos["telefono"], PDO::PARAM_STR);
-        $stmt->bindParam(":email", $datos["email"], PDO::PARAM_STR);
 
         if ($stmt->execute()) { return "ok"; } else { return "error"; }
     }
 
     public static function actualizarProveedorModel($datos) {
-        $stmt = Conexion::conectar()->prepare("UPDATE proveedores SET nombre_proveedor = :nombre_proveedor, telefono = :telefono, email = :email WHERE id_proveedor = :id_proveedor");
+        $stmt = Conexion::conectar()->prepare("UPDATE proveedores SET nombre_proveedor = :nombre_proveedor, telefono = :telefono WHERE id_proveedor = :id_proveedor");
         $stmt->bindParam(":nombre_proveedor", $datos["nombre_proveedor"], PDO::PARAM_STR);
         $stmt->bindParam(":telefono", $datos["telefono"], PDO::PARAM_STR);
-        $stmt->bindParam(":email", $datos["email"], PDO::PARAM_STR);
         $stmt->bindParam(":id_proveedor", $datos["id_proveedor"], PDO::PARAM_INT);
 
         if ($stmt->execute()) { return "ok"; } else { return "error"; }

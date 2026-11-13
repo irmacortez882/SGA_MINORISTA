@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $_SESSION["iniciarSesion"] = "ok"; // Forzar inicio de sesión para desarrollo
+
 /*=============================================
 1. INCLUSIÓN DE CONTROLADORES Y MODELOS
 =============================================*/
@@ -16,10 +17,14 @@ require_once "controllers/PlantillaController.php";
 require_once "controllers/VentaController.php";
 require_once "controllers/ProductoController.php";
 require_once "controllers/NotaCreditoController.php";
+require_once "controllers/ProveedorController.php";
+require_once "controllers/CategoriaController.php"; // Asegúrate de tener este controlador creado
 
 require_once "models/Venta.php";
 require_once "models/Producto.php";
 require_once "models/NotaCredito.php";
+require_once "models/Proveedor.php";
+require_once "models/Categoria.php"; // Asegúrate de tener este modelo creado
 
 /*=============================================
 2. ENRUTADOR DE PÁGINAS (CONTROLLER DE PLANTILLA)

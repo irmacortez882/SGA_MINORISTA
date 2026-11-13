@@ -2,54 +2,82 @@
 
 class ProveedorController {
 
-    public static function listarProveedoresController() {
-        return Proveedor::listarProveedoresModel();
-    }
-
-    public static function guardarProveedorController() {
+    // ==========================================
+    // CREAR PROVEEDOR
+    // ==========================================
+    static public function ctrCrearProveedor() {
         if (isset($_POST["nuevoNombreProveedor"])) {
+            
             $datos = array(
-                "nombre_proveedor" => trim($_POST["nuevoNombreProveedor"]),
-                "telefono"         => trim($_POST["nuevoTelefono"]),
-                "email"            => trim($_POST["nuevoEmail"])
+                "nombre_proveedor" => $_POST["nuevoNombreProveedor"],
+                "telefono" => $_POST["nuevoTelefono"]
             );
+
             $respuesta = Proveedor::guardarProveedorModel($datos);
 
-            if ($respuesta === "ok") {
-                echo '<script>window.location = "index.php?action=proveedores&status=success";</script>';
-                exit();
+            if ($respuesta == "ok") {
+                echo '<script>
+                    alert("El proveedor ha sido guardado correctamente");
+                    window.location = "proveedores";
+                </script>';
+            } else {
+                echo '<script>
+                    alert("¡Error al guardar el proveedor!");
+                </script>';
             }
         }
     }
 
-    public static function actualizarProveedorController() {
-        if (isset($_POST["editarIdProveedor"]) && isset($_POST["editarNombreProveedor"])) {
+    // ==========================================
+    // MOSTRAR PROVEEDORES
+    // ==========================================
+    static public function ctrMostrarProveedores($item, $valor) {
+        $respuesta = Proveedor::listarProveedoresModel();
+        return $respuesta;
+    }
+
+    // ==========================================
+    // EDITAR PROVEEDOR
+    // ==========================================
+    static public function ctrEditarProveedor() {
+        if (isset($_POST["editarNombreProveedor"])) {
+            
             $datos = array(
-                "id_proveedor"     => $_POST["editarIdProveedor"],
-                "nombre_proveedor" => trim($_POST["editarNombreProveedor"]),
-                "telefono"         => trim($_POST["editarTelefono"]),
-                "email"            => trim($_POST["editarEmail"])
+                "id_proveedor" => $_POST["idProveedor"],
+                "nombre_proveedor" => $_POST["editarNombreProveedor"],
+                "telefono" => $_POST["editarTelefono"]
             );
+
             $respuesta = Proveedor::actualizarProveedorModel($datos);
 
-            if ($respuesta === "ok") {
-                echo '<script>window.location = "index.php?action=proveedores&status=updated";</script>';
-                exit();
+            if ($respuesta == "ok") {
+                echo '<script>
+                    alert("El proveedor ha sido actualizado correctamente");
+                    window.location = "proveedores";
+                </script>';
+            } else {
+                echo '<script>
+                    alert("¡Error al actualizar el proveedor!");
+                </script>';
             }
         }
     }
 
-    public static function eliminarProveedorController() {
-        if (isset($_GET["idEliminarProveedor"])) {
-            $id = $_GET["idEliminarProveedor"];
-            $respuesta = Proveedor::eliminarProveedorModel($id);
+    // ==========================================
+    // BORRAR PROVEEDOR
+    // ==========================================
+    static public function ctrBorrarProveedor() {
+        if (isset($_GET["idProveedor"])) {
+            
+            $datos = $_GET["idProveedor"];
+            $respuesta = Proveedor::eliminarProveedorModel($datos);
 
-            if ($respuesta === "ok") {
-                echo '<script>window.location = "index.php?action=proveedores&status=deleted";</script>';
-                exit();
+            if ($respuesta == "ok") {
+                echo '<script>
+                    alert("El proveedor ha sido borrado correctamente");
+                    window.location = "proveedores";
+                </script>';
             }
         }
     }
-
-    
 }

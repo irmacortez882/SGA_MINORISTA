@@ -33,10 +33,13 @@ if (session_status() === PHP_SESSION_NONE) {
         <!-- PIE DE PÁGINA -->
         <?php include "views/includes/footer.php"; ?>
 
-        <!-- SCRIPTS JS (Usando CDN para jQuery por seguridad y constante URL para locales) -->
+        <!-- =============================================
+        SCRIPTS JAVASCRIPT (JQUERY + BOOTSTRAP 5 + LOCALES)
+        ============================================= -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?php echo URL; ?>views/assets/main.js"></script>
+        
 
     <?php else: ?>
 
@@ -46,7 +49,7 @@ if (session_status() === PHP_SESSION_NONE) {
         </main>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <?php endif; ?>
 

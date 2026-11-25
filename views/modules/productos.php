@@ -7,7 +7,7 @@
       Administrar Productos
     </h1>
     <ol class="breadcrumb">
-      <li><a href="inicio"><i class="fa fa-dashboard"></i> Inicio</a></li>
+      <li><a href="index.php?action=inicio"><i class="fa fa-dashboard"></i> Inicio</a></li>
       <li class="active">Administrar productos</li>
     </ol>
   </section>
@@ -16,8 +16,11 @@
     <div class="box">
       
       <div class="box-header with-border">
-        <button class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarProducto">
-          Agregar Producto
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAgregarProducto">
+          <i class="fa fa-plus"></i> Agregar Producto
+        </button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalIngresarStock">
+          <i class="fa fa-plus-circle"></i> Ingresar Stock
         </button>
       </div>
 
@@ -50,7 +53,7 @@
           
           // Lógica de alerta de stock mínimo
           if ($value["stock_actual"] <= $value["stock_minimo"]) {
-              $alertaStock = 'style="background-color: #f2dede; font-weight: bold;"'; // Fondo rojizo suave
+              $alertaStock = 'style="background-color: #f2dede; font-weight: bold;"';
               $badgeStock = ' <span class="label label-danger">¡Bajo stock!</span>';
           } else {
               $alertaStock = '';
@@ -67,8 +70,8 @@
                   <td>'.$value["nombre_proveedor"].'</td>
                   <td>
                     <div class="btn-group">
-                      <button class="btn btn-warning btnEditarProducto" idProducto="'.$value["id_producto"].'" data-toggle="modal" data-target="#modalEditarProducto"><i class="fa fa-pencil"></i></button>
-                      <button class="btn btn-danger btnEliminarProducto" idProducto="'.$value["id_producto"].'"><i class="fa fa-times"></i></button>
+                      <button type="button" class="btn btn-warning btnEditarProducto" idProducto="'.$value["id_producto"].'" data-toggle="modal" data-target="#modalEditarProducto"><i class="fa fa-pencil"></i></button>
+                      <a class="btn btn-danger btnEliminarProducto" href="index.php?action=productos&idProducto='.$value["id_producto"].'"><i class="fa fa-times"></i></a>
                     </div>
                   </td>
                 </tr>';
@@ -83,6 +86,68 @@
 
     </div>
   </section>
+</div>
+
+<!-- =======================================
+MODAL INGRESAR STOCK (REPOSICIÓN)
+======================================= -->
+<div id="modalIngresarStock" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form role="form" method="post">
+
+        <div class="modal-header" style="background:#00a65a; color:white">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Ingresar Stock</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="box-body">
+
+            <div class="form-group">
+              <label>Seleccionar producto</label>
+              <select class="form-control input-lg" id="selectProductoStock" name="idProductoStock" required>
+                <option value="">Seleccionar producto</option>
+                <?php
+                $listaProductosStock = ProductoController::ctrMostrarProductos(null, null);
+                foreach ($listaProductosStock as $prod) {
+                  echo '<option value="'.$prod["id_producto"].'" data-stock="'.$prod["stock_actual"].'" data-categoria="'.$prod["nombre_categoria"].'" data-proveedor="'.$prod["nombre_proveedor"].'">'
+                    .$prod["nombre_producto"].' (Stock actual: '.$prod["stock_actual"].')
+                  </option>';
+                }
+                ?>
+              </select>
+            </div>
+
+            <div class="well well-sm" id="infoProductoStock" style="display:none;">
+              <strong>Stock actual:</strong> <span id="lblStockActual">0</span><br>
+              <strong>Categoría:</strong> <span id="lblCategoriaStock">-</span><br>
+              <strong>Proveedor:</strong> <span id="lblProveedorStock">-</span>
+            </div>
+
+            <div class="form-group">
+              <label>Cantidad a ingresar</label>
+              <input type="number" min="1" step="1" class="form-control input-lg" name="cantidadIngresar" placeholder="Ingresar cantidad" required>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Salir</button>
+          <button type="submit" class="btn btn-success">Guardar ingreso</button>
+        </div>
+
+        <?php
+        $ingresarStock = new ProductoController();
+        $ingresarStock->ctrIngresarStock();
+        ?>
+
+      </form>
+
+    </div>
+  </div>
 </div>
 
 <!-- =======================================
@@ -102,7 +167,6 @@ MODAL AGREGAR PRODUCTO
         <div class="modal-body">
           <div class="box-body">
 
-            <!-- Nombre del Producto -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-product-hunt"></i></span>
@@ -110,7 +174,6 @@ MODAL AGREGAR PRODUCTO
               </div>
             </div>
 
-            <!-- Selector de Categoría -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-th"></i></span>
@@ -119,14 +182,13 @@ MODAL AGREGAR PRODUCTO
                   <?php
                   $categorias = CategoriaController::ctrMostrarCategorias(null, null);
                   foreach ($categorias as $key => $cat) {
-                    echo '<option value="'.$cat["id_categoría"].'">'.$cat["nombre_categoria"].'</option>';
+                    echo '<option value="'.$cat["id_categoria"].'">'.$cat["nombre_categoria"].'</option>';
                   }
                   ?>
                 </select>
               </div>
             </div>
 
-            <!-- Selector de Proveedor -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-truck"></i></span>
@@ -142,7 +204,6 @@ MODAL AGREGAR PRODUCTO
               </div>
             </div>
 
-            <!-- Stock Actual -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
@@ -150,7 +211,6 @@ MODAL AGREGAR PRODUCTO
               </div>
             </div>
 
-            <!-- Stock Mínimo -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-warning"></i></span>
@@ -158,7 +218,6 @@ MODAL AGREGAR PRODUCTO
               </div>
             </div>
 
-            <!-- Precio de Venta -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-money"></i></span>
@@ -184,6 +243,7 @@ MODAL AGREGAR PRODUCTO
     </div>
   </div>
 </div>
+
 <!-- =======================================
 MODAL EDITAR PRODUCTO
 ======================================= -->
@@ -201,10 +261,8 @@ MODAL EDITAR PRODUCTO
         <div class="modal-body">
           <div class="box-body">
 
-            <!-- ID del Producto Oculto -->
             <input type="hidden" id="idProducto" name="idProducto">
 
-            <!-- Nombre del Producto -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-product-hunt"></i></span>
@@ -212,7 +270,6 @@ MODAL EDITAR PRODUCTO
               </div>
             </div>
 
-            <!-- Selector de Categoría -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-th"></i></span>
@@ -221,14 +278,13 @@ MODAL EDITAR PRODUCTO
                   <?php
                   $categorias = CategoriaController::ctrMostrarCategorias(null, null);
                   foreach ($categorias as $key => $cat) {
-                    echo '<option value="'.$cat["id_categoría"].'">'.$cat["nombre_categoria"].'</option>';
+                    echo '<option value="'.$cat["id_categoria"].'">'.$cat["nombre_categoria"].'</option>';
                   }
                   ?>
                 </select>
               </div>
             </div>
 
-            <!-- Selector de Proveedor -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-truck"></i></span>
@@ -244,7 +300,6 @@ MODAL EDITAR PRODUCTO
               </div>
             </div>
 
-            <!-- Stock Actual -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
@@ -252,7 +307,6 @@ MODAL EDITAR PRODUCTO
               </div>
             </div>
 
-            <!-- Stock Mínimo -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-warning"></i></span>
@@ -260,7 +314,6 @@ MODAL EDITAR PRODUCTO
               </div>
             </div>
 
-            <!-- Precio de Venta -->
             <div class="form-group">
               <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-money"></i></span>
@@ -286,3 +339,24 @@ MODAL EDITAR PRODUCTO
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+  $("#selectProductoStock").on("change", function() {
+    var opt = $(this).find("option:selected");
+    if (!$(this).val()) {
+      $("#infoProductoStock").hide();
+      return;
+    }
+    $("#lblStockActual").text(opt.attr("data-stock") || 0);
+    $("#lblCategoriaStock").text(opt.attr("data-categoria") || "-");
+    $("#lblProveedorStock").text(opt.attr("data-proveedor") || "-");
+    $("#infoProductoStock").show();
+  });
+});
+</script>
+
+      
+       
+                   
+       

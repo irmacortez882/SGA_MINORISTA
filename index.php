@@ -16,15 +16,13 @@ $_SESSION["iniciarSesion"] = "ok"; // Forzar inicio de sesión para desarrollo
 require_once "controllers/PlantillaController.php";
 require_once "controllers/VentaController.php";
 require_once "controllers/ProductoController.php";
-require_once "controllers/NotaCreditoController.php";
 require_once "controllers/ProveedorController.php";
-require_once "controllers/CategoriaController.php"; // Asegúrate de tener este controlador creado
+require_once "controllers/CategoriaController.php";
 
 require_once "models/Venta.php";
 require_once "models/Producto.php";
-require_once "models/NotaCredito.php";
 require_once "models/Proveedor.php";
-require_once "models/Categoria.php"; // Asegúrate de tener este modelo creado
+require_once "models/Categoria.php";
 
 /*=============================================
 2. ENRUTADOR DE PÁGINAS (CONTROLLER DE PLANTILLA)
@@ -37,21 +35,19 @@ class Enrutador {
 
             $ruta = $_GET["action"];
 
-            // Lista blanca exacta según tus archivos en views/modules/
+            // Lista blanca exacta según tus archivos activos en views/modules/
             if ($ruta == "inicio" ||
                 $ruta == "categorias" ||
                 $ruta == "crear-venta" ||
                 $ruta == "ventas" ||
                 $ruta == "ver-ventas" ||
+                $ruta == "ticket" ||
                 $ruta == "inventario" ||
                 $ruta == "proveedores" ||
                 $ruta == "informes" ||
                 $ruta == "imprimir" ||
                 $ruta == "login" ||
-                $ruta == "notas-credito" ||
                 $ruta == "productos" ||
-                $ruta == "crear-nota-credito" ||
-                $ruta == "emitir-nota-credito" ||
                 $ruta == "salir" )
              {
 

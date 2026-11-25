@@ -22,7 +22,7 @@ class ProductoController {
             if ($respuesta == "ok") {
                 echo '<script>
                     alert("El producto ha sido guardado correctamente");
-                    window.location = "productos";
+                    window.location = "index.php?action=productos";
                 </script>';
             } else {
                 echo '<script>
@@ -61,11 +61,42 @@ class ProductoController {
             if ($respuesta == "ok") {
                 echo '<script>
                     alert("El producto ha sido actualizado correctamente");
-                    window.location = "productos";
+                    window.location = "index.php?action=productos";
                 </script>';
             } else {
                 echo '<script>
                     alert("¡Error al actualizar el producto!");
+                </script>';
+            }
+        }
+    }
+
+    // ==========================================
+    // INGRESAR STOCK (REPOSICIÓN)
+    // ==========================================
+    static public function ctrIngresarStock() {
+        if (isset($_POST["idProductoStock"]) && isset($_POST["cantidadIngresar"])) {
+
+            $idProducto = intval($_POST["idProductoStock"]);
+            $cantidad   = intval($_POST["cantidadIngresar"]);
+
+            if ($idProducto <= 0 || $cantidad <= 0) {
+                echo '<script>
+                    alert("Seleccioná un producto y una cantidad mayor a cero.");
+                </script>';
+                return;
+            }
+
+            $respuesta = Producto::ingresarStockModel($idProducto, $cantidad);
+
+            if ($respuesta == "ok") {
+                echo '<script>
+                    alert("¡Stock ingresado correctamente!");
+                    window.location = "index.php?action=productos";
+                </script>';
+            } else {
+                echo '<script>
+                    alert("¡Error al ingresar el stock!");
                 </script>';
             }
         }
@@ -83,7 +114,7 @@ class ProductoController {
             if ($respuesta == "ok") {
                 echo '<script>
                     alert("El producto ha sido borrado correctamente");
-                    window.location = "productos";
+                    window.location = "index.php?action=productos";
                 </script>';
             }
         }

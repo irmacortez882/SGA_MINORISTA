@@ -4,7 +4,7 @@ require_once __DIR__ . "/../config/conexion.php";
 class Producto {
 
     // ==========================================
-    // LISTAR PRODUCTOS (CON JOIN A CATEGORÍAS Y PROVEEDORES)
+    // LISTAR PRODUCTOS (CON JOIN A CATEGORIAS Y PROVEEDORES)
     // ==========================================
     public static function listarProductosModel() {
         $stmt = Conexion::conectar()->prepare("
@@ -17,7 +17,7 @@ class Producto {
                 c.nombre_categoria, 
                 pr.nombre_proveedor 
             FROM productos p
-            INNER JOIN categorias c ON p.id_categoria = c.id_categoría
+            INNER JOIN categorias c ON p.id_categoria = c.id_categoria
             INNER JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
             ORDER BY p.nombre_producto ASC
         ");
@@ -67,6 +67,24 @@ class Producto {
     }
 
     // ==========================================
+    // INGRESAR STOCK (REPOSICIÓN)
+    // ==========================================
+    public static function ingresarStockModel($idProducto, $cantidad) {
+        $stmt = Conexion::conectar()->prepare(
+            "UPDATE productos SET stock_actual = stock_actual + :cantidad WHERE id_producto = :id_producto"
+        );
+
+        $stmt->bindParam(":cantidad", $cantidad, PDO::PARAM_INT);
+        $stmt->bindParam(":id_producto", $idProducto, PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            return "ok";
+        } else {
+            return "error";
+        }
+    }
+
+    // ==========================================
     // ELIMINAR PRODUCTO
     // ==========================================
     public static function eliminarProductoModel($id) {
@@ -80,3 +98,4 @@ class Producto {
         }
     }
 }
+   

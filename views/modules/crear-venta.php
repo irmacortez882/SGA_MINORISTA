@@ -35,8 +35,7 @@ require_once "models/Venta.php";
                                 <option value="">-- Seleccionar Producto --</option>
                                 <?php
                                 try {
-                                    $productos = ProductoController::listarProductosController();
-
+                                    $productos = ProductoController::ctrMostrarProductos(null, null);
                                     if (!empty($productos) && is_array($productos)) {
                                         foreach ($productos as $key => $value) {
                                             $idProd = $value["id_producto"] ?? $value["id"] ?? 0;
@@ -47,8 +46,9 @@ require_once "models/Venta.php";
                                             echo '<option value="'.$idProd.'" data-precio="'.$precio.'" data-stock="'.$stock.'" data-descripcion="'.$desc.'">'.$desc.' (Stock: '.$stock.') - $'.number_format($precio, 2, ',', '.').'</option>';
                                         }
                                     }
-                                } catch (Exception $e) {
-                                    echo '<option value="">Error al cargar productos</option>';
+                                
+                                } catch (Throwable $e) {
+                                  echo '<option value="">Error: ' . htmlspecialchars($e->getMessage()) . '</option>';
                                 }
                                 ?>
                             </select>
@@ -284,12 +284,18 @@ $(document).ready(function() {
             processData: false,
             dataType: "json",
             success: function(respuesta) {
-                if (respuesta && respuesta.status === "ok") {
-                    alert("¡Venta registrada con éxito! Factura N°: " + respuesta.codigo_factura);
-                    window.open("index.php?action=ver-ventas&id=" + respuesta.id_venta, "_blank");
-                    window.location = "index.php?action=crear-venta";
-                } else {
-                    // Muestra el mensaje exacto que viene del servidor
+            if (respuesta && respuesta.status === "ok") {
+    alert("¡Venta registrada con éxito! Factura N°: " + respuesta.codigo_factura);
+    if (respuesta.id_venta) {
+        window.location = "index.php?action=ticket&id=" + respuesta.id_venta;
+    } else {
+        window.location = "index.php?action=ticket";
+    }
+
+                        
+            }else{
+
+                            // Muestra el mensaje exacto que viene del servidor
                     alert("Error devuelto por el servidor: " + (respuesta.mensaje || JSON.stringify(respuesta)));
                 }
             },
